@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cricket Tournament Scorecard & Collaborative Hub</title>
   
-  <!-- Firebase SDKs -->
+  <!-- Firebase Realtime Database SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -24,24 +24,10 @@
       --purple: #8b5cf6;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
 
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      display: flex;
-      min-height: 100vh;
-    }
-
-    .app-layout {
-      display: flex;
-      width: 100%;
-    }
+    .app-layout { display: flex; width: 100%; }
 
     .sidebar {
       width: 280px;
@@ -56,304 +42,69 @@
       overflow: hidden;
     }
 
-    .sidebar.collapsed {
-      width: 76px;
-      padding: 20px 10px;
-    }
+    .sidebar.collapsed { width: 76px; padding: 20px 10px; }
+    .sidebar.collapsed .collapse-text { display: none; }
 
-    .sidebar.collapsed .collapse-text {
-      display: none;
-    }
-
-    .sidebar h2 {
-      font-size: 1.1rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      white-space: nowrap;
-    }
+    .sidebar h2 { font-size: 1.1rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
 
     .nav-btn {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 10px 14px;
-      border-radius: 6px;
-      text-align: left;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      transition: background 0.2s;
-      white-space: nowrap;
+      background: transparent; color: var(--text); border: 1px solid var(--border);
+      padding: 10px 14px; border-radius: 6px; text-align: left; font-weight: 600;
+      cursor: pointer; width: 100%; transition: background 0.2s; white-space: nowrap;
     }
 
-    .nav-btn:hover, .nav-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-    }
+    .nav-btn:hover, .nav-btn.active { background: var(--accent); border-color: var(--accent); }
 
-    .match-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      overflow-y: auto;
-      max-height: 30vh;
-    }
+    .match-list { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; max-height: 30vh; }
+    .match-card-item { background: var(--card-bg); border: 1px solid var(--border); padding: 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
+    .match-card-item:hover { border-color: var(--accent); }
 
-    .match-card-item {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
+    .main-content { flex: 1; padding: 24px; overflow-y: auto; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 20px; }
+    .card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border); }
 
-    .match-card-item:hover {
-      border-color: var(--accent);
-    }
+    .view-section { display: none; width: 100%; }
+    .view-section.active { display: block; }
 
-    .main-content {
-      flex: 1;
-      padding: 24px;
-      overflow-y: auto;
-      display: flex;
-      justify-content: center;
-    }
+    .header-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px; }
+    .team-title input { font-size: 1.2rem; font-weight: 700; background: transparent; color: var(--text); border: 1px dashed var(--border); padding: 4px 8px; border-radius: 4px; width: 100%; max-width: 320px; }
 
-    .container {
-      width: 100%;
-      max-width: 900px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+    .score-display { display: flex; align-items: baseline; gap: 12px; }
+    .main-score { font-size: 3rem; font-weight: 800; color: #ffffff; }
+    .overs-display { font-size: 1.25rem; color: var(--muted); }
 
-    .card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 20px;
-      border: 1px solid var(--border);
-    }
+    .stats-row { display: flex; gap: 20px; font-size: 0.9rem; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+    .stats-row span strong { color: var(--text); }
 
-    .view-section {
-      display: none;
-      width: 100%;
-    }
+    .sync-status-badge { display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; background: var(--border); color: var(--muted); }
+    .sync-status-badge.live { background: rgba(34, 197, 94, 0.2); color: var(--highlight); border: 1px solid var(--highlight); }
 
-    .view-section.active {
-      display: block;
-    }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95rem; }
+    th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 600; }
 
-    .header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 12px;
-      margin-bottom: 16px;
-    }
-
-    .team-title input {
-      font-size: 1.2rem;
-      font-weight: 700;
-      background: transparent;
-      color: var(--text);
-      border: 1px dashed var(--border);
-      padding: 4px 8px;
-      border-radius: 4px;
-      width: 100%;
-      max-width: 320px;
-    }
-
-    .score-display {
-      display: flex;
-      align-items: baseline;
-      gap: 12px;
-    }
-
-    .main-score {
-      font-size: 3rem;
-      font-weight: 800;
-      color: #ffffff;
-    }
-
-    .overs-display {
-      font-size: 1.25rem;
-      color: var(--muted);
-    }
-
-    .stats-row {
-      display: flex;
-      gap: 20px;
-      font-size: 0.9rem;
-      color: var(--muted);
-      margin-top: 8px;
-      flex-wrap: wrap;
-    }
-
-    .stats-row span strong {
-      color: var(--text);
-    }
-
-    .target-banner {
-      background: rgba(2, 132, 199, 0.2);
-      border: 1px solid var(--accent);
-      padding: 10px;
-      border-radius: 6px;
-      margin-top: 10px;
-      font-size: 0.95rem;
-    }
-
-    .sync-status-badge {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      background: var(--border);
-      color: var(--text);
-      margin-top: 6px;
-    }
-
-    .sync-status-badge.live {
-      background: rgba(34, 197, 94, 0.2);
-      color: var(--highlight);
-      border: 1px solid var(--highlight);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 0.95rem;
-    }
-
-    th, td {
-      padding: 8px 12px;
-      text-align: left;
-    }
-
-    th {
-      color: var(--muted);
-      border-bottom: 1px solid var(--border);
-      font-weight: 600;
-    }
-
-    td {
-      border-bottom: 1px solid var(--border);
-    }
-
-    .controls-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    button {
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 6px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.2s;
-    }
-
-    button:hover {
-      background: var(--accent-hover);
-    }
-
+    .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 10px; margin-top: 10px; }
+    
+    button { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
+    button:hover { background: var(--accent-hover); }
     button.special { background: #475569; }
     button.wicket { background: var(--danger); }
     button.gold { background: var(--gold); color: #000; }
     button.undo-btn { background: var(--purple); }
 
-    .management-bar {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-      flex-wrap: wrap;
-    }
+    .management-bar { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .management-bar button { padding: 8px 12px; font-size: 0.85rem; }
 
-    .management-bar button {
-      padding: 8px 12px;
-      font-size: 0.85rem;
-    }
-
-    .recent-balls {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      overflow-x: auto;
-    }
-
-    .ball-badge {
-      background: var(--border);
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 0.85rem;
-    }
-
+    .recent-balls { display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; }
+    .ball-badge { background: var(--border); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; }
     .ball-badge.wicket { background: var(--danger); }
     .ball-badge.boundary { background: var(--highlight); color: #000; }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .form-group label { font-size: 0.9rem; color: var(--muted); }
+    .form-group input { padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; }
 
-    .form-group label {
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-
-    .form-group input {
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      font-size: 1rem;
-    }
-
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .modal {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      width: 90%;
-      max-width: 450px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .leaderboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-    }
+    .leaderboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
   </style>
 </head>
 <body onload="initApp()">
@@ -376,37 +127,30 @@
     <div class="match-list collapse-text" id="sidebar-match-list">
       <div style="font-size: 0.85rem; color: var(--muted);">No matches recorded yet.</div>
     </div>
-
-    <hr style="border-color: var(--border); margin: 10px 0;" class="collapse-text" />
-
-    <h2 class="collapse-text">Data Backup</h2>
-    <button class="nav-btn collapse-text" onclick="exportDataFile()">📥 <span>Export History File</span></button>
-    <button class="nav-btn collapse-text" onclick="document.getElementById('import-file-input').click()">📤 <span>Import History File</span></button>
-    <input type="file" id="import-file-input" style="display: none;" accept=".json" onchange="importDataFile(event)" />
   </div>
 
   <!-- Main Content -->
   <div class="main-content">
     <div class="container">
 
+      <!-- ROOM CODE BAR (ALWAYS VISIBLE AT TOP) -->
+      <div class="card" style="border: 2px solid var(--accent); background: rgba(2, 132, 199, 0.1);">
+        <h3 style="color: var(--accent); margin-bottom: 6px;">📲 Live Multi-Phone Sync</h3>
+        <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 12px;">Enter any Room Code (e.g. <strong>MATCH101</strong>) on your & your friends' phones to score together live!</p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <input type="text" id="room-code-input" placeholder="ENTER ROOM CODE (e.g. MATCH101)" style="flex: 1; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-weight: bold; text-transform: uppercase;" />
+          <button class="gold" onclick="connectToRoom()" style="padding: 10px 18px;">🔗 Join Live Room</button>
+        </div>
+        <div style="margin-top: 10px;">
+          <span id="active-room-badge" class="sync-status-badge">Mode: Local Device Only</span>
+        </div>
+      </div>
+
       <!-- HOME VIEW -->
       <div id="home-view" class="view-section active">
-        <!-- Room Code / Collaboration Card -->
-        <div class="card" style="border-color: var(--accent);">
-          <h2>🌐 Live Multi-Device Collaboration</h2>
-          <p style="color: var(--muted); font-size: 0.9rem; margin-top: 4px; margin-bottom: 12px;">
-            Enter a shared <strong>Room Code</strong> to let you and your friends score from different phones in real-time.
-          </p>
-          <div style="display: flex; gap: 10px;">
-            <input type="text" id="room-code-input" placeholder="Enter Room Code (e.g. CRICKET-101)" style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-weight: bold; text-transform: uppercase;" />
-            <button class="gold" onclick="connectToRoom()">Connect Room</button>
-          </div>
-          <div id="active-room-status" class="sync-status-badge">Offline (Local Storage Mode)</div>
-        </div>
-
-        <div class="card" style="margin-top: 20px;">
+        <div class="card">
           <h2>Start New Match</h2>
-          <p style="color: var(--muted); margin-bottom: 16px; font-size: 0.9rem;">Configure match settings before starting.</p>
+          <p style="color: var(--muted); margin-bottom: 16px; font-size: 0.9rem;">Configure match parameters before tossing.</p>
           
           <div class="form-group">
             <label>Match Name / Title</label>
@@ -423,15 +167,6 @@
             </div>
           </div>
           <button class="gold" onclick="startNewMatch()" style="width: 100%; margin-top: 10px;">🚀 Start New Match</button>
-        </div>
-
-        <div class="card" style="margin-top: 20px;">
-          <h2>Tournament Quick Stats</h2>
-          <div class="stats-row" style="margin-top: 12px; font-size: 1rem;">
-            <span>Total Matches Played: <strong id="stat-total-matches">0</strong></span>
-            <span>Total Runs Scored: <strong id="stat-total-runs">0</strong></span>
-            <span>Total Wickets Taken: <strong id="stat-total-wickets">0</strong></span>
-          </div>
         </div>
       </div>
 
@@ -450,19 +185,12 @@
           <div class="stats-row">
             <span>Innings: <strong id="innings-text">1st Innings</strong></span>
             <span>CRR: <strong id="crr-text">0.00</strong></span>
-            <span id="match-room-badge" class="sync-status-badge">Local Mode</span>
-          </div>
-          
-          <div class="target-banner" id="target-banner" style="display: none;">
-            Target: <strong id="target-runs-text">0</strong> | 
-            Need <strong id="runs-needed-text">0</strong> runs in <strong id="balls-remaining-text">0</strong> balls | 
-            RRR: <strong id="rrr-text">0.00</strong>
           </div>
         </div>
 
         <!-- Batting Table -->
         <div class="card">
-          <h3>Batting <span style="font-size: 0.8rem; font-weight: normal; color: var(--muted);">(Click name to rename)</span></h3>
+          <h3>Batting</h3>
           <table>
             <thead>
               <tr>
@@ -480,10 +208,7 @@
 
         <!-- Bowling Table -->
         <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3>Bowling <span style="font-size: 0.8rem; font-weight: normal; color: var(--muted);">(Click name to rename)</span></h3>
-            <button class="special" onclick="showBowlerModal()" style="padding: 6px 12px; font-size: 0.85rem;">Change Bowler</button>
-          </div>
+          <h3>Bowling</h3>
           <table>
             <thead>
               <tr>
@@ -505,11 +230,8 @@
           <div class="management-bar">
             <button class="gold" onclick="switchInnings()">End Innings / Start 2nd</button>
             <button class="gold" onclick="finishAndSaveMatch()">💾 Save Match to History</button>
-            <button class="special" onclick="renameBatter(gameState.strikerIndex)">Rename Striker</button>
-            <button class="special" onclick="renameBatter(gameState.nonStrikerIndex)">Rename Non-Striker</button>
-            <button class="special" onclick="renameBowler(gameState.currentBowlerIndex)">Rename Bowler</button>
             <button class="special" onclick="addNewBatter()">+ Add Batter</button>
-            <button class="special" onclick="addNewBowlerPrompt()">+ Add Bowler</button>
+            <button class="special" onclick="addNewBowler()">+ Add Bowler</button>
           </div>
         </div>
 
@@ -523,13 +245,8 @@
             <button onclick="addRun(3)">3</button>
             <button onclick="addRun(4)">4</button>
             <button onclick="addRun(6)">6</button>
-            <button class="special" onclick="addExtra('wd')">WD</button>
-            <button class="special" onclick="addExtra('nb')">NB</button>
-            <button class="special" onclick="addOverthrow()">OV</button>
             <button class="wicket" onclick="addWicket()">W</button>
-            <button class="undo-btn" onclick="undoLastAction()" style="grid-column: span 2;">↩ Undo</button>
           </div>
-
           <div style="margin-top: 16px;">Recent Deliveries:</div>
           <div class="recent-balls" id="recent-balls-list"></div>
         </div>
@@ -539,23 +256,16 @@
       <div id="leaderboard-view" class="view-section">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
           <h2>🏆 Tournament Leaderboards</h2>
-          <button class="gold" onclick="exportLeaderboard()" style="padding: 8px 14px; font-size: 0.9rem;">📥 Save / Export Leaderboard</button>
+          <button class="gold" onclick="exportLeaderboard()">📥 Export Leaderboard JSON</button>
         </div>
         <div class="leaderboard-grid">
           <div class="card">
             <h3 style="color: var(--gold);">Most Career Runs</h3>
-            <table id="lb-most-runs">
-              <thead><tr><th>Player</th><th>Runs</th></tr></thead>
-              <tbody></tbody>
-            </table>
+            <table id="lb-most-runs"><thead><tr><th>Player</th><th>Runs</th></tr></thead><tbody></tbody></table>
           </div>
-
           <div class="card">
             <h3 style="color: var(--gold);">Most Career Wickets</h3>
-            <table id="lb-most-wickets">
-              <thead><tr><th>Player</th><th>Wkts</th></tr></thead>
-              <tbody></tbody>
-            </table>
+            <table id="lb-most-wickets"><thead><tr><th>Player</th><th>Wkts</th></tr></thead><tbody></tbody></table>
           </div>
         </div>
       </div>
@@ -565,19 +275,21 @@
 </div>
 
 <script>
-  // Replace with your Firebase config if using a custom project
+  // Insert your Firebase URL here for multi-device sync
   const firebaseConfig = {
-    databaseURL: "https://cricket-scorecard-default-rtdb.firebaseio.com"
+    databaseURL: "YOUR_FIREBASE_DATABASE_URL" 
   };
 
   let db = null;
   let currentRoomCode = null;
 
   try {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.database();
+    if (firebaseConfig.databaseURL && firebaseConfig.databaseURL !== "YOUR_FIREBASE_DATABASE_URL") {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+    }
   } catch (e) {
-    console.warn("Firebase initialized without custom config.");
+    console.log("Firebase initialized in fallback mode.");
   }
 
   let tournamentStore = { matches: [] };
@@ -586,7 +298,6 @@
     maxOvers: 20,
     maxWickets: 10,
     currentInnings: 1,
-    firstInningsTarget: 0,
     totalRuns: 0,
     wickets: 0,
     legalBalls: 0,
@@ -600,47 +311,49 @@
     bowlers: [
       { name: "Mitchell Starc", balls: 0, maidens: 0, runs: 0, wickets: 0 }
     ],
-    recentDeliveries: [],
-    history: []
+    recentDeliveries: []
   };
 
   function initApp() {
-    const saved = localStorage.getItem('cricket_data');
+    const saved = localStorage.getItem('cricket_hub_data');
     if (saved) {
       try { tournamentStore = JSON.parse(saved); } catch (e) {}
     }
-    updateUI();
+    updateUI(false);
   }
 
   function connectToRoom() {
     const code = document.getElementById('room-code-input').value.trim().toUpperCase();
     if (!code) { alert("Please enter a valid room code."); return; }
-    
-    currentRoomCode = code;
-    document.getElementById('active-room-status').textContent = `🟢 Connected Live: Room ${code}`;
-    document.getElementById('active-room-status').classList.add('live');
-    document.getElementById('match-room-badge').textContent = `LIVE: Room ${code}`;
-    document.getElementById('match-room-badge').classList.add('live');
 
-    // Listen for live database changes from friends
-    if (db) {
-      db.ref('rooms/' + currentRoomCode).on('value', (snapshot) => {
-        const val = snapshot.val();
-        if (val && val.gameState) {
-          gameState = val.gameState;
-          updateUI(false);
-        }
-      });
+    if (!db) {
+      alert("Firebase Database URL is not set in the script yet!\n\nPlease add your Firebase database URL into the 'firebaseConfig' variable near the bottom of the HTML file to enable real-time sync.");
+      return;
     }
-    alert(`Connected to Room "${code}"! Scores are now synced in real time.`);
+
+    currentRoomCode = code;
+    const badge = document.getElementById('active-room-badge');
+    badge.textContent = `🟢 LIVE SYNC: ROOM "${currentRoomCode}"`;
+    badge.classList.add('live');
+
+    // Attach real-time database listener
+    db.ref('rooms/' + currentRoomCode).on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data && data.gameState) {
+        gameState = data.gameState;
+        updateUI(false);
+      }
+    });
+
+    alert(`Successfully joined Room "${currentRoomCode}"! Scores updated on any device connected to this room code will update automatically.`);
   }
 
   function syncState() {
-    localStorage.setItem('cricket_data', JSON.stringify(tournamentStore));
+    localStorage.setItem('cricket_hub_data', JSON.stringify(tournamentStore));
     if (db && currentRoomCode) {
       db.ref('rooms/' + currentRoomCode).set({
         gameState: gameState,
-        lastUpdated: Date.now()
+        updatedAt: Date.now()
       });
     }
   }
@@ -653,6 +366,36 @@
     document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
+  }
+
+  function startNewMatch() {
+    const title = document.getElementById('setup-title').value.trim() || "Match";
+    const overs = parseInt(document.getElementById('setup-overs').value, 10) || 20;
+    const wickets = parseInt(document.getElementById('setup-wickets').value, 10) || 10;
+
+    gameState = {
+      teamName: title,
+      maxOvers: overs,
+      maxWickets: wickets,
+      currentInnings: 1,
+      totalRuns: 0,
+      wickets: 0,
+      legalBalls: 0,
+      strikerIndex: 0,
+      nonStrikerIndex: 1,
+      currentBowlerIndex: 0,
+      batters: [
+        { name: "Batter 1", runs: 0, balls: 0, fours: 0, sixes: 0, out: false },
+        { name: "Batter 2", runs: 0, balls: 0, fours: 0, sixes: 0, out: false }
+      ],
+      bowlers: [
+        { name: "Bowler 1", balls: 0, maidens: 0, runs: 0, wickets: 0 }
+      ],
+      recentDeliveries: []
+    };
+
+    updateUI(true);
+    showView('tracker-view');
   }
 
   function addRun(runs) {
@@ -671,14 +414,9 @@
     gameState.legalBalls += 1;
     gameState.recentDeliveries.push(runs.toString());
 
-    if (runs % 2 !== 0) {
-      const temp = gameState.strikerIndex;
-      gameState.strikerIndex = gameState.nonStrikerIndex;
-      gameState.nonStrikerIndex = temp;
-    }
+    if (runs % 2 !== 0) rotateStrike();
 
-    syncState();
-    updateUI();
+    updateUI(true);
   }
 
   function addWicket() {
@@ -693,24 +431,91 @@
     bowler.wickets += 1;
 
     gameState.recentDeliveries.push('W');
-    syncState();
-    updateUI();
+    updateUI(true);
   }
 
-  function updateUI(shouldSync = true) {
+  function rotateStrike() {
+    const temp = gameState.strikerIndex;
+    gameState.strikerIndex = gameState.nonStrikerIndex;
+    gameState.nonStrikerIndex = temp;
+  }
+
+  function addNewBatter() {
+    const name = prompt("Enter new batter name:");
+    if (name && name.trim()) {
+      gameState.batters.push({ name: name.trim(), runs: 0, balls: 0, fours: 0, sixes: 0, out: false });
+      updateUI(true);
+    }
+  }
+
+  function addNewBowler() {
+    const name = prompt("Enter new bowler name:");
+    if (name && name.trim()) {
+      gameState.bowlers.push({ name: name.trim(), balls: 0, maidens: 0, runs: 0, wickets: 0 });
+      gameState.currentBowlerIndex = gameState.bowlers.length - 1;
+      updateUI(true);
+    }
+  }
+
+  function finishAndSaveMatch() {
+    tournamentStore.matches.push({
+      id: Date.now(),
+      title: gameState.teamName,
+      date: new Date().toLocaleDateString(),
+      finalState: JSON.parse(JSON.stringify(gameState))
+    });
+    syncState();
+    alert("Match saved to tournament history!");
+  }
+
+  function exportLeaderboard() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tournamentStore, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", `leaderboard_${Date.now()}.json`);
+    dlAnchor.click();
+  }
+
+  function updateUI(triggerSync = false) {
     document.getElementById('score-text').textContent = `${gameState.totalRuns}/${gameState.wickets}`;
     document.getElementById('overs-text').textContent = `(${Math.floor(gameState.legalBalls/6)}.${gameState.legalBalls%6} / ${gameState.maxOvers} overs)`;
     
-    // Render Batting
+    const crr = gameState.legalBalls > 0 ? (gameState.totalRuns / (gameState.legalBalls / 6)).toFixed(2) : "0.00";
+    document.getElementById('crr-text').textContent = crr;
+
+    // Batting Table
     const battingTbody = document.getElementById('batting-table');
     battingTbody.innerHTML = '';
     gameState.batters.forEach((b, idx) => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${b.name} ${idx === gameState.strikerIndex ? '⚡' : ''}</td><td><strong>${b.runs}</strong></td><td>${b.balls}</td><td>${b.fours}</td><td>${b.sixes}</td><td>${b.balls > 0 ? ((b.runs/b.balls)*100).toFixed(1) : 0}</td>`;
+      const isStriker = idx === gameState.strikerIndex ? ' ⚡' : '';
+      tr.innerHTML = `<td>${b.name}${isStriker}</td><td><strong>${b.runs}</strong></td><td>${b.balls}</td><td>${b.fours}</td><td>${b.sixes}</td><td>${b.balls > 0 ? ((b.runs/b.balls)*100).toFixed(1) : "0.0"}</td>`;
       battingTbody.appendChild(tr);
     });
 
-    if (shouldSync) syncState();
+    // Bowling Table
+    const bowlingTbody = document.getElementById('bowling-table');
+    bowlingTbody.innerHTML = '';
+    gameState.bowlers.forEach((bo, idx) => {
+      const tr = document.createElement('tr');
+      const isCurrent = idx === gameState.currentBowlerIndex ? ' 🟢' : '';
+      tr.innerHTML = `<td>${bo.name}${isCurrent}</td><td>${Math.floor(bo.balls/6)}.${bo.balls%6}</td><td>${bo.maidens}</td><td>${bo.runs}</td><td>${bo.wickets}</td><td>${bo.balls > 0 ? ((bo.runs/bo.balls)*6).toFixed(2) : "0.00"}</td>`;
+      bowlingTbody.appendChild(tr);
+    });
+
+    // Recent Deliveries
+    const recentList = document.getElementById('recent-balls-list');
+    recentList.innerHTML = '';
+    gameState.recentDeliveries.slice(-10).forEach(ball => {
+      const badge = document.createElement('div');
+      badge.className = 'ball-badge';
+      if (ball === 'W') badge.classList.add('wicket');
+      if (ball === '4' || ball === '6') badge.classList.add('boundary');
+      badge.textContent = ball;
+      recentList.appendChild(badge);
+    });
+
+    if (triggerSync) syncState();
   }
 </script>
 </body>
