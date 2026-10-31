@@ -225,6 +225,12 @@
       border-bottom: 1px solid var(--border);
     }
 
+    .clickable-name {
+      cursor: pointer;
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
     /* Controls */
     .controls-grid {
       display: grid;
@@ -1141,7 +1147,6 @@
   }
 
   function updateUI() {
-    document.getElementById('score-text5') || '';
     document.getElementById('score-text').textContent = `${gameState.totalRuns}/${gameState.wickets}`;
     document.getElementById('overs-text').textContent = `(${formatOvers(gameState.legalBalls)} / ${gameState.maxOvers} overs)`;
     document.getElementById('innings-text').textContent = gameState.currentInnings === 1 ? "1st Innings" : "2nd Innings";
@@ -1173,7 +1178,6 @@
       const isNonStriker = idx === gameState.nonStrikerIndex;
       let indicator = "";
       if (isStriker) indicator = " *";
-      if (isNonStriker) indicator = "";
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
